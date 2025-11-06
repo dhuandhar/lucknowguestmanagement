@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nimisha Evan Family Get-together - Guest Management</title>
+    <title>Guest Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes fadeIn {
@@ -21,14 +21,15 @@
         import { getDatabase, ref, onValue, push, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyC_WbR9N4G9_UsoV-b4iQPxovYMUT_fjw8",
-            authDomain: "lucknowguestmanagement.firebaseapp.com",
-            databaseURL: "https://lucknowguestmanagement-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "lucknowguestmanagement",
-            storageBucket: "lucknowguestmanagement.firebasestorage.app",
-            messagingSenderId: "294148660549",
-            appId: "1:294148660549:web:8b43ec04b10d3134b1322c"
-        };
+  apiKey: "AIzaSyC_WbR9N4G9_UsoV-b4iQPxovYMUT_fjw8",
+  authDomain: "lucknowguestmanagement.firebaseapp.com",
+  databaseURL: "https://lucknowguestmanagement-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "lucknowguestmanagement",
+  storageBucket: "lucknowguestmanagement.firebasestorage.app",
+  messagingSenderId: "294148660549",
+  appId: "1:294148660549:web:8b43ec04b10d3134b1322c"
+};
+
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
@@ -61,83 +62,18 @@
         }
 
         async function handleSubmit() {
-            console.log('=== VALIDATION START ===');
-            console.log('Full formData:', JSON.stringify(formData, null, 2));
-            
-            // Trim name and mobile
-            const name = formData.name.trim();
-            const mobile = formData.mobile.trim();
-            
-            console.log('Name (trimmed):', name);
-            console.log('Mobile (trimmed):', mobile);
-            
-            if (!name || !mobile) {
+            if (!formData.name || !formData.mobile) {
                 alert('Please fill in guest name and mobile number');
                 return;
             }
 
-            // Check arrival with detailed logging
-            const hasArrivalDate = formData.arrivalDate && formData.arrivalDate.trim() !== '';
-            const hasArrivalTime = formData.arrivalTime && formData.arrivalTime.trim() !== '';
-            const hasArrivalMode = formData.arrivalMode && formData.arrivalMode.trim() !== '';
-            
-            console.log('Arrival validation:', {
-                date: formData.arrivalDate,
-                time: formData.arrivalTime,
-                mode: formData.arrivalMode,
-                hasDate: hasArrivalDate,
-                hasTime: hasArrivalTime,
-                hasMode: hasArrivalMode
-            });
-            
-            const hasArrival = hasArrivalDate && hasArrivalTime && hasArrivalMode;
-            
-            // Check departure with detailed logging
-            const hasDepartureDate = formData.departureDate && formData.departureDate.trim() !== '';
-            const hasDepartureTime = formData.departureTime && formData.departureTime.trim() !== '';
-            const hasDepartureMode = formData.departureMode && formData.departureMode.trim() !== '';
-            
-            console.log('Departure validation:', {
-                date: formData.departureDate,
-                time: formData.departureTime,
-                mode: formData.departureMode,
-                hasDate: hasDepartureDate,
-                hasTime: hasDepartureTime,
-                hasMode: hasDepartureMode
-            });
-            
-            const hasDeparture = hasDepartureDate && hasDepartureTime && hasDepartureMode;
-            
-            console.log('Final validation result:', { hasArrival, hasDeparture });
+            const hasArrival = formData.arrivalDate && formData.arrivalTime && formData.arrivalMode;
+            const hasDeparture = formData.departureDate && formData.departureTime && formData.departureMode;
 
             if (!hasArrival && !hasDeparture) {
-                // Provide more helpful error message
-                let missingFields = [];
-                if (!hasArrival) {
-                    let arrivalMissing = [];
-                    if (!hasArrivalDate) arrivalMissing.push('date');
-                    if (!hasArrivalTime) arrivalMissing.push('time');
-                    if (!hasArrivalMode) arrivalMissing.push('mode');
-                    if (arrivalMissing.length > 0) {
-                        missingFields.push(`Arrival: ${arrivalMissing.join(', ')}`);
-                    }
-                }
-                if (!hasDeparture) {
-                    let departureMissing = [];
-                    if (!hasDepartureDate) departureMissing.push('date');
-                    if (!hasDepartureTime) departureMissing.push('time');
-                    if (!hasDepartureMode) departureMissing.push('mode');
-                    if (departureMissing.length > 0) {
-                        missingFields.push(`Departure: ${departureMissing.join(', ')}`);
-                    }
-                }
-                
-                alert(`Please fill in either arrival or departure information (or both).\n\nMissing fields:\n${missingFields.join('\n')}`);
-                console.log('=== VALIDATION FAILED ===');
+                alert('Please fill in either arrival or departure information (or both)');
                 return;
             }
-
-            console.log('=== VALIDATION PASSED ===');
 
             try {
                 if (editingId) {
@@ -185,20 +121,11 @@
             }
         }
 
-        window.sendPickupWA = async (id) => {
-            const guest = guests.find(g => g.id === id);
-            if (!guest) return;
-            
-            if (guest.pickupMessageSent === true) {
-                const resend = confirm(`⚠️ WhatsApp message was already sent for ${guest.name}'s pickup.\n\nDo you want to send it again?`);
-                if (!resend) return;
-            }
-
+        function sendPickupWhatsApp(guest) {
             let assignment = '';
             if (guest.pickupDriver || guest.pickupCarMake || guest.pickupCarNumber) {
                 assignment = 'Pick-up Assignment:\n';
                 if (guest.pickupDriver) assignment += `Driver: ${guest.pickupDriver}\n`;
-                if (guest.pickupDriverMobile) assignment += `Mobile: +${guest.pickupDriverMobile}\n`;
                 if (guest.pickupCarMake || guest.pickupCarNumber) {
                     assignment += `Car: ${guest.pickupCarMake || ''} ${guest.pickupCarNumber || ''}`.trim() + '\n';
                 }
@@ -206,31 +133,15 @@
                 assignment = 'Pick-up Assignment: TBA\n';
             }
             
-            const msg = `Dear ${guest.name},\n\nYour pick-up for the Nimisha Evan Family Get-together on ${guest.arrivalDate} at ${guest.arrivalTime} has been arranged.\n\n${assignment}\nWe look forward to welcoming you!\n\nThe Pachorys`;
+            const msg = `Dear ${guest.name},\n\nYour pick-up for arrival on ${guest.arrivalDate} at ${guest.arrivalTime} has been arranged.\n\n${assignment}\nWe look forward to welcoming you!\n\nPachory family`;
             window.open(`https://wa.me/${guest.mobile}?text=${encodeURIComponent(msg)}`, '_blank');
-            
-            try {
-                await update(ref(database, `guests/${id}`), { pickupMessageSent: true });
-                showSuccess('Pickup message sent!');
-            } catch (err) {
-                console.error('Error updating message status:', err);
-            }
-        };
-        
-        window.sendDropWA = async (id) => {
-            const guest = guests.find(g => g.id === id);
-            if (!guest) return;
-            
-            if (guest.dropMessageSent === true) {
-                const resend = confirm(`⚠️ WhatsApp message was already sent for ${guest.name}'s drop.\n\nDo you want to send it again?`);
-                if (!resend) return;
-            }
+        }
 
+        function sendDropWhatsApp(guest) {
             let assignment = '';
             if (guest.dropDriver || guest.dropCarMake || guest.dropCarNumber) {
                 assignment = 'Drop Assignment:\n';
                 if (guest.dropDriver) assignment += `Driver: ${guest.dropDriver}\n`;
-                if (guest.dropDriverMobile) assignment += `Mobile: +${guest.dropDriverMobile}\n`;
                 if (guest.dropCarMake || guest.dropCarNumber) {
                     assignment += `Car: ${guest.dropCarMake || ''} ${guest.dropCarNumber || ''}`.trim() + '\n';
                 }
@@ -238,24 +149,17 @@
                 assignment = 'Drop Assignment: TBA\n';
             }
             
-            const msg = `Dear ${guest.name},\n\nYour drop for departure on ${guest.departureDate} at ${guest.departureTime} has been arranged.\n\n${assignment}\nThank you for joining the Nimisha Evan Family Get-together!\n\nThe Pachorys`;
+            const msg = `Dear ${guest.name},\n\nYour drop for departure on ${guest.departureDate} at ${guest.departureTime} has been arranged.\n\n${assignment}\nThank you for visiting us!\n\nPachory family`;
             window.open(`https://wa.me/${guest.mobile}?text=${encodeURIComponent(msg)}`, '_blank');
-            
-            try {
-                await update(ref(database, `guests/${id}`), { dropMessageSent: true });
-                showSuccess('Drop message sent!');
-            } catch (err) {
-                console.error('Error updating message status:', err);
-            }
-        };
+        }
 
         function render() {
             document.getElementById('app').innerHTML = `
                 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h1 class="text-3xl font-bold text-indigo-900">Nimisha Evan Family Get-together</h1>
-                            <p class="text-sm text-gray-600 mt-1">Guest Management • Firebase Connected • ${guests.length} guests</p>
+                            <h1 class="text-3xl font-bold text-indigo-900">Guest Management System</h1>
+                            <p class="text-sm text-gray-600 mt-1">Firebase Connected • ${guests.length} guests</p>
                         </div>
                         <button onclick="toggleForm()" class="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
                             ${showForm ? '✕ Cancel' : '+ Add Guest'}
@@ -319,7 +223,7 @@
                                             <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
                                                 +91
                                             </span>
-                                            <input type="tel" id="pickupDriverMobile" value="${formData.pickupDriverMobile.replace('91', '')}" placeholder="9876543210" class="rounded-none rounded-r-lg flex-1 min-w-0 w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                            <input type="tel" id="pickupDriverMobile" value="${formData.pickupDriverMobile}" placeholder="9876543210" class="rounded-none rounded-r-lg flex-1 min-w-0 w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                                         </div>
                                     </div>
                                     <div>
@@ -373,7 +277,7 @@
                                             <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
                                                 +91
                                             </span>
-                                            <input type="tel" id="dropDriverMobile" value="${formData.dropDriverMobile.replace('91', '')}" placeholder="9876543210" class="rounded-none rounded-r-lg flex-1 min-w-0 w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                            <input type="tel" id="dropDriverMobile" value="${formData.dropDriverMobile}" placeholder="9876543210" class="rounded-none rounded-r-lg flex-1 min-w-0 w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                                         </div>
                                     </div>
                                     <div>
@@ -485,49 +389,123 @@
 
         window.toggleForm = () => { showForm = !showForm; if (!showForm) resetForm(); else render(); };
         window.saveForm = () => {
-            console.log('=== SAVE FORM CALLED ===');
-            console.log('Reading values from DOM...');
+            formData.name = document.getElementById('name').value;
+            formData.mobile = document.getElementById('mobile').value;
+            formData.arrivalDate = document.getElementById('arrivalDate').value;
+            formData.arrivalTime = document.getElementById('arrivalTime').value;
+            formData.arrivalMode = document.getElementById('arrivalMode').value;
+            formData.arrivalModeDetails = document.getElementById('arrivalModeDetails').value;
+            formData.pickupDriver = document.getElementById('pickupDriver').value;
             
-            formData.name = (document.getElementById('name')?.value || '').trim();
-            formData.mobile = (document.getElementById('mobile')?.value || '').trim();
-            formData.arrivalDate = document.getElementById('arrivalDate')?.value || '';
-            formData.arrivalTime = document.getElementById('arrivalTime')?.value || '';
-            formData.arrivalMode = document.getElementById('arrivalMode')?.value || '';
-            formData.arrivalModeDetails = document.getElementById('arrivalModeDetails')?.value || '';
-            formData.pickupDriver = document.getElementById('pickupDriver')?.value || '';
-            
-            let pickupMobile = (document.getElementById('pickupDriverMobile')?.value || '').trim();
+            // Add +91 prefix if not present
+            let pickupMobile = document.getElementById('pickupDriverMobile').value;
             formData.pickupDriverMobile = pickupMobile ? (pickupMobile.startsWith('91') ? pickupMobile : '91' + pickupMobile) : '';
             
-            formData.pickupCarNumber = document.getElementById('pickupCarNumber')?.value || '';
-            formData.pickupCarMake = document.getElementById('pickupCarMake')?.value || '';
-            formData.departureDate = document.getElementById('departureDate')?.value || '';
-            formData.departureTime = document.getElementById('departureTime')?.value || '';
-            formData.departureMode = document.getElementById('departureMode')?.value || '';
-            formData.departureModeDetails = document.getElementById('departureModeDetails')?.value || '';
-            formData.dropDriver = document.getElementById('dropDriver')?.value || '';
+            formData.pickupCarNumber = document.getElementById('pickupCarNumber').value;
+            formData.pickupCarMake = document.getElementById('pickupCarMake').value;
+            formData.departureDate = document.getElementById('departureDate').value;
+            formData.departureTime = document.getElementById('departureTime').value;
+            formData.departureMode = document.getElementById('departureMode').value;
+            formData.departureModeDetails = document.getElementById('departureModeDetails').value;
+            formData.dropDriver = document.getElementById('dropDriver').value;
             
-            let dropMobile = (document.getElementById('dropDriverMobile')?.value || '').trim();
+            // Add +91 prefix if not present
+            let dropMobile = document.getElementById('dropDriverMobile').value;
             formData.dropDriverMobile = dropMobile ? (dropMobile.startsWith('91') ? dropMobile : '91' + dropMobile) : '';
             
-            formData.dropCarNumber = document.getElementById('dropCarNumber')?.value || '';
-            formData.dropCarMake = document.getElementById('dropCarMake')?.value || '';
-            
-            console.log('Values captured from DOM:', {
-                name: formData.name,
-                mobile: formData.mobile,
-                arrivalDate: formData.arrivalDate,
-                arrivalTime: formData.arrivalTime,
-                arrivalMode: formData.arrivalMode,
-                departureDate: formData.departureDate,
-                departureTime: formData.departureTime,
-                departureMode: formData.departureMode
-            });
-            
+            formData.dropCarNumber = document.getElementById('dropCarNumber').value;
+            formData.dropCarMake = document.getElementById('dropCarMake').value;
             handleSubmit();
         };
         window.editGuest = (id) => handleEdit(guests.find(g => g.id === id));
         window.deleteGuest = (id) => handleDelete(id);
+        window.sendPickupWA = async (id) => {
+            const guest = guests.find(g => g.id === id);
+            if (!guest) {
+                alert('Guest not found');
+                return;
+            }
+            
+            console.log('Guest data:', guest);
+            console.log('pickupMessageSent:', guest.pickupMessageSent);
+            
+            if (guest.pickupMessageSent === true) {
+                const resend = confirm(`⚠️ WhatsApp message was already sent for ${guest.name}'s pickup.\n\nDo you want to send it again?`);
+                if (!resend) {
+                    console.log('User cancelled resend');
+                    return;
+                }
+                console.log('User confirmed resend');
+            }
+
+            let assignment = '';
+            if (guest.pickupDriver || guest.pickupCarMake || guest.pickupCarNumber) {
+                assignment = 'Pick-up Assignment:\n';
+                if (guest.pickupDriver) assignment += `Driver: ${guest.pickupDriver}\n`;
+                if (guest.pickupCarMake || guest.pickupCarNumber) {
+                    assignment += `Car: ${guest.pickupCarMake || ''} ${guest.pickupCarNumber || ''}`.trim() + '\n';
+                }
+            } else {
+                assignment = 'Pick-up Assignment: TBA\n';
+            }
+            
+            const msg = `Dear ${guest.name},\n\nYour pick-up for arrival on ${guest.arrivalDate} at ${guest.arrivalTime} has been arranged.\n\n${assignment}\nWe look forward to welcoming you!\n\nPachory family`;
+            window.open(`https://wa.me/${guest.mobile}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            try {
+                console.log('Updating Firebase: pickupMessageSent = true for guest ID:', id);
+                await update(ref(database, `guests/${id}`), { pickupMessageSent: true });
+                console.log('Firebase updated successfully');
+                showSuccess('Pickup message sent!');
+            } catch (err) {
+                console.error('Error updating message status:', err);
+                alert('Error saving message status: ' + err.message);
+            }
+        };
+        
+        window.sendDropWA = async (id) => {
+            const guest = guests.find(g => g.id === id);
+            if (!guest) {
+                alert('Guest not found');
+                return;
+            }
+            
+            console.log('Guest data:', guest);
+            console.log('dropMessageSent:', guest.dropMessageSent);
+            
+            if (guest.dropMessageSent === true) {
+                const resend = confirm(`⚠️ WhatsApp message was already sent for ${guest.name}'s drop.\n\nDo you want to send it again?`);
+                if (!resend) {
+                    console.log('User cancelled resend');
+                    return;
+                }
+                console.log('User confirmed resend');
+            }
+
+            let assignment = '';
+            if (guest.dropDriver || guest.dropCarMake || guest.dropCarNumber) {
+                assignment = 'Drop Assignment:\n';
+                if (guest.dropDriver) assignment += `Driver: ${guest.dropDriver}\n`;
+                if (guest.dropCarMake || guest.dropCarNumber) {
+                    assignment += `Car: ${guest.dropCarMake || ''} ${guest.dropCarNumber || ''}`.trim() + '\n';
+                }
+            } else {
+                assignment = 'Drop Assignment: TBA\n';
+            }
+            
+            const msg = `Dear ${guest.name},\n\nYour drop for departure on ${guest.departureDate} at ${guest.departureTime} has been arranged.\n\n${assignment}\nThank you for visiting us!\n\nPachory family`;
+            window.open(`https://wa.me/${guest.mobile}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            try {
+                console.log('Updating Firebase: dropMessageSent = true for guest ID:', id);
+                await update(ref(database, `guests/${id}`), { dropMessageSent: true });
+                console.log('Firebase updated successfully');
+                showSuccess('Drop message sent!');
+            } catch (err) {
+                console.error('Error updating message status:', err);
+                alert('Error saving message status: ' + err.message);
+            }
+        };
 
         render();
     </script>
