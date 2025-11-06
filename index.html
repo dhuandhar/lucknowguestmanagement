@@ -61,25 +61,83 @@
         }
 
         async function handleSubmit() {
-            console.log('Starting validation...');
-            console.log('Name:', formData.name);
-            console.log('Mobile:', formData.mobile);
+            console.log('=== VALIDATION START ===');
+            console.log('Full formData:', JSON.stringify(formData, null, 2));
             
-            if (!formData.name || !formData.mobile) {
+            // Trim name and mobile
+            const name = formData.name.trim();
+            const mobile = formData.mobile.trim();
+            
+            console.log('Name (trimmed):', name);
+            console.log('Mobile (trimmed):', mobile);
+            
+            if (!name || !mobile) {
                 alert('Please fill in guest name and mobile number');
                 return;
             }
 
-            const hasArrival = formData.arrivalDate && formData.arrivalTime && formData.arrivalMode;
-            const hasDeparture = formData.departureDate && formData.departureTime && formData.departureMode;
+            // Check arrival with detailed logging
+            const hasArrivalDate = formData.arrivalDate && formData.arrivalDate.trim() !== '';
+            const hasArrivalTime = formData.arrivalTime && formData.arrivalTime.trim() !== '';
+            const hasArrivalMode = formData.arrivalMode && formData.arrivalMode.trim() !== '';
             
-            console.log('hasArrival:', hasArrival);
-            console.log('hasDeparture:', hasDeparture);
+            console.log('Arrival validation:', {
+                date: formData.arrivalDate,
+                time: formData.arrivalTime,
+                mode: formData.arrivalMode,
+                hasDate: hasArrivalDate,
+                hasTime: hasArrivalTime,
+                hasMode: hasArrivalMode
+            });
+            
+            const hasArrival = hasArrivalDate && hasArrivalTime && hasArrivalMode;
+            
+            // Check departure with detailed logging
+            const hasDepartureDate = formData.departureDate && formData.departureDate.trim() !== '';
+            const hasDepartureTime = formData.departureTime && formData.departureTime.trim() !== '';
+            const hasDepartureMode = formData.departureMode && formData.departureMode.trim() !== '';
+            
+            console.log('Departure validation:', {
+                date: formData.departureDate,
+                time: formData.departureTime,
+                mode: formData.departureMode,
+                hasDate: hasDepartureDate,
+                hasTime: hasDepartureTime,
+                hasMode: hasDepartureMode
+            });
+            
+            const hasDeparture = hasDepartureDate && hasDepartureTime && hasDepartureMode;
+            
+            console.log('Final validation result:', { hasArrival, hasDeparture });
 
             if (!hasArrival && !hasDeparture) {
-                alert('Please fill in either arrival or departure information (or both)');
+                // Provide more helpful error message
+                let missingFields = [];
+                if (!hasArrival) {
+                    let arrivalMissing = [];
+                    if (!hasArrivalDate) arrivalMissing.push('date');
+                    if (!hasArrivalTime) arrivalMissing.push('time');
+                    if (!hasArrivalMode) arrivalMissing.push('mode');
+                    if (arrivalMissing.length > 0) {
+                        missingFields.push(`Arrival: ${arrivalMissing.join(', ')}`);
+                    }
+                }
+                if (!hasDeparture) {
+                    let departureMissing = [];
+                    if (!hasDepartureDate) departureMissing.push('date');
+                    if (!hasDepartureTime) departureMissing.push('time');
+                    if (!hasDepartureMode) departureMissing.push('mode');
+                    if (departureMissing.length > 0) {
+                        missingFields.push(`Departure: ${departureMissing.join(', ')}`);
+                    }
+                }
+                
+                alert(`Please fill in either arrival or departure information (or both).\n\nMissing fields:\n${missingFields.join('\n')}`);
+                console.log('=== VALIDATION FAILED ===');
                 return;
             }
+
+            console.log('=== VALIDATION PASSED ===');
 
             try {
                 if (editingId) {
@@ -427,6 +485,9 @@
 
         window.toggleForm = () => { showForm = !showForm; if (!showForm) resetForm(); else render(); };
         window.saveForm = () => {
+            console.log('=== SAVE FORM CALLED ===');
+            console.log('Reading values from DOM...');
+            
             formData.name = (document.getElementById('name')?.value || '').trim();
             formData.mobile = (document.getElementById('mobile')?.value || '').trim();
             formData.arrivalDate = document.getElementById('arrivalDate')?.value || '';
@@ -451,6 +512,17 @@
             
             formData.dropCarNumber = document.getElementById('dropCarNumber')?.value || '';
             formData.dropCarMake = document.getElementById('dropCarMake')?.value || '';
+            
+            console.log('Values captured from DOM:', {
+                name: formData.name,
+                mobile: formData.mobile,
+                arrivalDate: formData.arrivalDate,
+                arrivalTime: formData.arrivalTime,
+                arrivalMode: formData.arrivalMode,
+                departureDate: formData.departureDate,
+                departureTime: formData.departureTime,
+                departureMode: formData.departureMode
+            });
             
             handleSubmit();
         };
