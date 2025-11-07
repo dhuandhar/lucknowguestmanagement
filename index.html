@@ -126,6 +126,7 @@
             if (guest.pickupDriver || guest.pickupCarMake || guest.pickupCarNumber) {
                 assignment = 'Pick-up Assignment:\n';
                 if (guest.pickupDriver) assignment += `Driver: ${guest.pickupDriver}\n`;
+                if (guest.pickupDriverMobile) assignment += `Driver Mobile: +${guest.pickupDriverMobile}\n`;
                 if (guest.pickupCarMake || guest.pickupCarNumber) {
                     assignment += `Car: ${guest.pickupCarMake || ''} ${guest.pickupCarNumber || ''}`.trim() + '\n';
                 }
@@ -142,6 +143,7 @@
             if (guest.dropDriver || guest.dropCarMake || guest.dropCarNumber) {
                 assignment = 'Drop Assignment:\n';
                 if (guest.dropDriver) assignment += `Driver: ${guest.dropDriver}\n`;
+                if (guest.dropDriverMobile) assignment += `Driver Mobile: +${guest.dropDriverMobile}\n`;
                 if (guest.dropCarMake || guest.dropCarNumber) {
                     assignment += `Car: ${guest.dropCarMake || ''} ${guest.dropCarNumber || ''}`.trim() + '\n';
                 }
@@ -336,12 +338,13 @@
                                             <span class="font-semibold">Driver:</span> ${guest.pickupDriver || 'TBA'}
                                         </p>
                                         ${guest.pickupDriverMobile ? `
-                                            <p class="text-sm text-gray-700 mb-1">
+                                            <div class="text-sm text-gray-700 mb-2">
                                                 <span class="font-semibold">Mobile:</span>
-                                                <a href="tel:+${guest.pickupDriverMobile}" class="ml-2 text-green-600 hover:text-green-800 font-semibold underline">
-                                                    📞 +${guest.pickupDriverMobile}
+                                                <span class="ml-2">+${guest.pickupDriverMobile}</span>
+                                                <a href="tel:+${guest.pickupDriverMobile}" class="ml-2 inline-flex items-center bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition text-xs font-semibold">
+                                                    📞 Call Driver
                                                 </a>
-                                            </p>
+                                            </div>
                                         ` : ''}
                                         <p class="text-sm text-gray-700 mb-1"><span class="font-semibold">Car:</span> ${guest.pickupCarMake || ''} ${guest.pickupCarNumber || ''}</p>
                                     ` : ''}
@@ -364,12 +367,13 @@
                                             <span class="font-semibold">Driver:</span> ${guest.dropDriver || 'TBA'}
                                         </p>
                                         ${guest.dropDriverMobile ? `
-                                            <p class="text-sm text-gray-700 mb-1">
+                                            <div class="text-sm text-gray-700 mb-2">
                                                 <span class="font-semibold">Mobile:</span>
-                                                <a href="tel:+${guest.dropDriverMobile}" class="ml-2 text-orange-600 hover:text-orange-800 font-semibold underline">
-                                                    📞 +${guest.dropDriverMobile}
+                                                <span class="ml-2">+${guest.dropDriverMobile}</span>
+                                                <a href="tel:+${guest.dropDriverMobile}" class="ml-2 inline-flex items-center bg-orange-600 text-white px-3 py-1 rounded-md hover:bg-orange-700 transition text-xs font-semibold">
+                                                    📞 Call Driver
                                                 </a>
-                                            </p>
+                                            </div>
                                         ` : ''}
                                         <p class="text-sm text-gray-700 mb-3"><span class="font-semibold">Car:</span> ${guest.dropCarMake || ''} ${guest.dropCarNumber || ''}</p>
                                     ` : ''}
@@ -442,6 +446,7 @@
             if (guest.pickupDriver || guest.pickupCarMake || guest.pickupCarNumber) {
                 assignment = 'Pick-up Assignment:\n';
                 if (guest.pickupDriver) assignment += `Driver: ${guest.pickupDriver}\n`;
+                if (guest.pickupDriverMobile) assignment += `Driver Mobile: +${guest.pickupDriverMobile}\n`;
                 if (guest.pickupCarMake || guest.pickupCarNumber) {
                     assignment += `Car: ${guest.pickupCarMake || ''} ${guest.pickupCarNumber || ''}`.trim() + '\n';
                 }
@@ -486,6 +491,7 @@
             if (guest.dropDriver || guest.dropCarMake || guest.dropCarNumber) {
                 assignment = 'Drop Assignment:\n';
                 if (guest.dropDriver) assignment += `Driver: ${guest.dropDriver}\n`;
+                if (guest.dropDriverMobile) assignment += `Driver Mobile: +${guest.dropDriverMobile}\n`;
                 if (guest.dropCarMake || guest.dropCarNumber) {
                     assignment += `Car: ${guest.dropCarMake || ''} ${guest.dropCarNumber || ''}`.trim() + '\n';
                 }
