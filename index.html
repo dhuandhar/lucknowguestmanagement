@@ -67,11 +67,11 @@
                 return;
             }
 
-            const hasArrival = formData.arrivalDate && formData.arrivalTime && formData.arrivalMode;
-            const hasDeparture = formData.departureDate && formData.departureTime && formData.departureMode;
+            const hasAnyArrival = formData.arrivalDate || formData.arrivalTime || formData.arrivalMode || formData.arrivalModeDetails;
+            const hasAnyDeparture = formData.departureDate || formData.departureTime || formData.departureMode || formData.departureModeDetails;
 
-            if (!hasArrival && !hasDeparture) {
-                alert('Please fill in either arrival or departure information (or both)');
+            if (!hasAnyArrival && !hasAnyDeparture) {
+                alert('Please fill in at least one arrival or departure field');
                 return;
             }
 
